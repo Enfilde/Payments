@@ -10,7 +10,7 @@ public class Controller {
         return 0;
     }
 
-    public String getPaymentName() {
+    public String getPaymentPurpose() {
         return null;
     }
 
@@ -18,11 +18,11 @@ public class Controller {
         return null;
     }
 
-    public double getPaymentAmount() {
+    public double getPaymentSum() {
         return 0;
     }
 
-    public java.lang.String getSenderName() {
+    public String getSenderName() {
         return null;
     }
 
@@ -43,7 +43,7 @@ public class Controller {
     }
 
     public double getBalance() {
-        return 0;
+        return 0.0;
     }
 
     public void addOrganization() {
