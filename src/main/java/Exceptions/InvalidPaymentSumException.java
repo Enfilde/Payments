@@ -1,4 +1,7 @@
 package Exceptions;
 
-public class InvalidPaymentSumException {
+public class InvalidPaymentSumException extends OrganizationAndPaymentsException{
+    public InvalidPaymentSumException() {
+        super("");
+    }
 }

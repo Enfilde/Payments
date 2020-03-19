@@ -1,6 +1,6 @@
 package Exceptions;
 
-public class OrganizationAndPaymentsException {
+public class OrganizationAndPaymentsException extends Throwable {
     public OrganizationAndPaymentsException(String name) {
         super();
     }
