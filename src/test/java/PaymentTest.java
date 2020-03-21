@@ -80,32 +80,37 @@ public class PaymentTest {
 
         try {
             c.addOrganization("test", "0000000", 18);
+            Assert.fail("InvalidRegistrationNumberFormat");
         } catch (InvalidRegistrationNumberFormatException e) {
-            Assert.assertEquals("InvalidRegistrationNumberFormat", e.getMessage());
+            Assert.assertNotEquals("", e.getMessage());
         }
 
         try {
             c.addOrganization("test", "000000000", 18);
+            Assert.fail("InvalidRegistrationNumberFormat");
         } catch (InvalidRegistrationNumberFormatException e) {
-            Assert.assertEquals("InvalidRegistrationNumberFormat", e.getMessage());
+            Assert.assertNotEquals("", e.getMessage());
         }
 
         try {
             c.addOrganization("test", "0000000A", 18);
+            Assert.fail("InvalidRegistrationNumberFormat");
         } catch (InvalidRegistrationNumberFormatException e) {
-            Assert.assertEquals("InvalidRegistrationNumberFormat", e.getMessage());
+            Assert.assertNotEquals("InvalidRegistrationNumberFormat", e.getMessage());
         }
 
         try {
             c.addOrganization("test", "elephant", 18);
+            Assert.fail("InvalidRegistrationNumberFormat");
         } catch (InvalidRegistrationNumberFormatException e) {
-            Assert.assertEquals("InvalidRegistrationNumberFormat", e.getMessage());
+            Assert.assertNotEquals("", e.getMessage());
         }
 
         try {
             c.addOrganization("test", "    ", 18);
+            Assert.fail("InvalidRegistrationNumberFormat");
         } catch (InvalidRegistrationNumberFormatException e) {
-            Assert.assertEquals("InvalidRegistrationNumberFormat", e.getMessage());
+            Assert.assertNotEquals("", e.getMessage());
         }
 
         try {

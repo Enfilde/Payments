@@ -21,7 +21,7 @@ public class Organization {
         this.balance = balance;
 
     }
-    public static boolean valNumber(String input) {
+    private boolean valNumber(String input) {
         String phoneRegex = "[0-9]{8}";
         Pattern phonePattern = Pattern.compile(phoneRegex);
         Matcher matcher = phonePattern.matcher(input);
