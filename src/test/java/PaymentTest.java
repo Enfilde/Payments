@@ -3,25 +3,26 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.lang.reflect.Array;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
 public class PaymentTest {
 
     @Test
-    public void paymentsOrganizationOne() {
+    public void paymentsOrganizationOne() throws OrganizationAndPaymentsException {
 
         Controller c = new Controller();
         c.addOrganization("exception", "00000001", 5569);
 
-        Assert.assertEquals("00000001", c.getRecipientName("exception"));
-        Assert.assertEquals(5569.0, c.getBalance("exception"));
+        Assert.assertEquals("00000001", c.getRegistrationNumber("exception"));
+        Assert.assertEquals(5569.0, c.getBalance("exception"),1.0);
 
     }
 
 
     @Test
-    public void paymentsOrganizationSeveral() {
+    public void paymentsOrganizationSeveral() throws OrganizationAndPaymentsException {
 
         Controller c = new Controller();
         c.addOrganization("whiskas", "00000003", 18);
@@ -29,13 +30,13 @@ public class PaymentTest {
 
         Assert.assertEquals("00000003", c.getRegistrationNumber("whiskas"));
         Assert.assertEquals("00000055", c.getRegistrationNumber("hello-kitty"));
-        Assert.assertEquals(79, c.getBalance("hello-kitty"));
+        Assert.assertEquals(79, c.getBalance("hello-kitty"),1.0);
 
     }
 
 
-    @Test(expected = EmptyNameException.class)
-    public void organizationWithEmptyName() {
+    @Test(expected = EmptyOrganizationNameException.class)
+    public void organizationWithEmptyName() throws OrganizationAndPaymentsException {
 
         Controller c = new Controller();
         c.addOrganization("", "00000055", 79);
@@ -43,8 +44,8 @@ public class PaymentTest {
     }
 
 
-    @Test(expected = InvalidNumberException.class)
-    public void organizationWithEmptyRegistrationNumber() {
+    @Test(expected = InvalidRegistrationNumberFormatException.class)
+    public void organizationWithEmptyRegistrationNumber() throws OrganizationAndPaymentsException {
 
         Controller c = new Controller();
         c.addOrganization("whiskas", "", 79);
@@ -53,7 +54,7 @@ public class PaymentTest {
 
 
     @Test(expected = DuplicateOrganizationException.class)
-    public void organizationWithDuplicateName() {
+    public void organizationWithDuplicateName() throws OrganizationAndPaymentsException {
 
         Controller c = new Controller();
         c.addOrganization("test", "00000000", 18);
@@ -62,8 +63,8 @@ public class PaymentTest {
     }
 
 
-    @Test(expected = DuplicateNumberException.class)
-    public void organizationWithDuplicateRegistrationNumber() {
+    @Test(expected = DuplicateRegistrationNumberException.class)
+    public void organizationWithDuplicateRegistrationNumber() throws OrganizationAndPaymentsException {
 
         Controller c = new Controller();
         c.addOrganization("test #1", "00000000", 18);
@@ -73,72 +74,72 @@ public class PaymentTest {
 
 
     @Test
-    public void organizationWithBadRegistrationNumber() {
+    public void organizationWithBadRegistrationNumber() throws OrganizationAndPaymentsException {
 
         Controller c = new Controller();
 
         try {
             c.addOrganization("test", "0000000", 18);
-        } catch (InvalidNumberException e) {
+        } catch (InvalidRegistrationNumberFormatException e) {
             Assert.assertEquals("InvalidRegistrationNumberFormat", e.getMessage());
         }
 
         try {
             c.addOrganization("test", "000000000", 18);
-        } catch (InvalidNumberException e) {
+        } catch (InvalidRegistrationNumberFormatException e) {
             Assert.assertEquals("InvalidRegistrationNumberFormat", e.getMessage());
         }
 
         try {
             c.addOrganization("test", "0000000A", 18);
-        } catch (InvalidNumberException e) {
+        } catch (InvalidRegistrationNumberFormatException e) {
             Assert.assertEquals("InvalidRegistrationNumberFormat", e.getMessage());
         }
 
         try {
             c.addOrganization("test", "elephant", 18);
-        } catch (InvalidNumberException e) {
+        } catch (InvalidRegistrationNumberFormatException e) {
             Assert.assertEquals("InvalidRegistrationNumberFormat", e.getMessage());
         }
 
         try {
             c.addOrganization("test", "    ", 18);
-        } catch (InvalidNumberException e) {
+        } catch (InvalidRegistrationNumberFormatException e) {
             Assert.assertEquals("InvalidRegistrationNumberFormat", e.getMessage());
         }
 
         try {
             c.addOrganization("test", "OOOOOOOO", 18);
-        } catch (InvalidNumberException e) {
+        } catch (InvalidRegistrationNumberFormatException e) {
             Assert.assertEquals("InvalidRegistrationNumberFormat", e.getMessage());
         }
     }
 
 
     @Test
-    public void organizationWithNegativeBalance() {
+    public void organizationWithNegativeBalance() throws OrganizationAndPaymentsException {
 
         Controller c = new Controller();
         c.addOrganization("own", "00000001", -100);
 
-        Assert.assertEquals(-100, c.getBalance("own"));
+        Assert.assertEquals(-100, c.getBalance("own"),1.0);
 
     }
 
 
     @Test
-    public void organizationWithZeroBalance() {
+    public void organizationWithZeroBalance() throws OrganizationAndPaymentsException {
 
         Controller c = new Controller();
         c.addOrganization("own", "00000001", 0);
 
-        Assert.assertEquals(0, c.getBalance("own"));
+        Assert.assertEquals(0, c.getBalance("own"),1.0);
 
     }
 
 
-    @Test(expected = OrganizationNotFoundException.class)
-    public void organizationObtainRegistrationNumberByEmptyName() {
+    @Test(expected = OrganizationCannotBeFoundException.class)
+    public void organizationObtainRegistrationNumberByEmptyName() throws OrganizationAndPaymentsException {
 
         Controller c = new Controller();
         c.addOrganization("test #1", "00000000", 18);
@@ -147,8 +148,8 @@ public class PaymentTest {
     }
 
 
-    @Test(expected = OrganizationNotFoundException.class)
-    public void organizationObtainRegistrationNumberForMissingOrganization() {
+    @Test(expected = OrganizationCannotBeFoundException.class)
+    public void organizationObtainRegistrationNumberForMissingOrganization() throws OrganizationAndPaymentsException {
 
         Controller c = new Controller();
         c.addOrganization("test #1", "00000000", 18);
@@ -157,8 +158,8 @@ public class PaymentTest {
     }
 
 
-    @Test(expected = OrganizationNotFoundException.class)
-    public void organizationObtainBalanceByEmptyName() {
+    @Test(expected = OrganizationCannotBeFoundException.class)
+    public void organizationObtainBalanceByEmptyName() throws OrganizationAndPaymentsException {
 
         Controller c = new Controller();
         c.addOrganization("test #1", "00000000", 18);
@@ -168,8 +169,8 @@ public class PaymentTest {
     }
 
 
-    @Test(expected = OrganizationNotFoundException.class)
-    public void organizationObtainBalanceForMissingOrganization() {
+    @Test(expected = OrganizationCannotBeFoundException.class)
+    public void organizationObtainBalanceForMissingOrganization() throws OrganizationAndPaymentsException {
 
         Controller c = new Controller();
         c.addOrganization("test #1", "00000000", 18);
@@ -180,7 +181,7 @@ public class PaymentTest {
 
 
     @Test
-    public void paymentOne() {
+    public void paymentOne() throws OrganizationAndPaymentsException {
 
         Controller c = new Controller();
         c.addOrganization("mystic", "00000000", 666);
@@ -190,16 +191,16 @@ public class PaymentTest {
         c.addPayment("mystic", "moon", "1", "Just for fun!", localDateTime, 69);
 
         Assert.assertEquals("mystic", c.getSenderName("1"));
-        Assert.assertEquals("moon", c.getRecipientName("1"));
+        Assert.assertEquals("moon", c.getRecieverName("1"));
         Assert.assertEquals("Just for fun!", c.getPaymentPurpose("1"));
         Assert.assertEquals(localDateTime, c.getPaymentDateTime("1"));
-        Assert.assertEquals(69, c.getPaymentSum("1"));
+        Assert.assertEquals(69, c.getPaymentSum("1"),1.0);
 
     }
 
 
     @Test
-    public void paymentSeveralForDifferentOrganizations() {
+    public void paymentSeveralForDifferentOrganizations() throws OrganizationAndPaymentsException {
 
         Controller c = new Controller();
 
@@ -214,22 +215,22 @@ public class PaymentTest {
         c.addPayment("sausages", "kitty", "37", "Mew", dateTime2, 13);
 
         Assert.assertEquals("mystic", c.getSenderName("556"));
-        Assert.assertEquals("moon", c.getRecipientName("556"));
+        Assert.assertEquals("moon", c.getRecieverName("556"));
         Assert.assertEquals("Rrrrr!", c.getPaymentPurpose("556"));
         Assert.assertEquals(dateTime1, c.getPaymentDateTime("556"));
-        Assert.assertEquals(12, c.getPaymentSum("556"));
+        Assert.assertEquals(12, c.getPaymentSum("556"),1.0);
 
         Assert.assertEquals("sausages", c.getSenderName("37"));
-        Assert.assertEquals("kitty", c.getRecipientName("37"));
+        Assert.assertEquals("kitty", c.getRecieverName("37"));
         Assert.assertEquals("Mew", c.getPaymentPurpose("37"));
         Assert.assertEquals(dateTime2, c.getPaymentDateTime("37"));
-        Assert.assertEquals(13, c.getPaymentSum("37"));
+        Assert.assertEquals(13, c.getPaymentSum("37"),1.0);
 
     }
 
 
     @Test
-    public void paymentSeveralForOneSender() {
+    public void paymentSeveralForOneSender() throws OrganizationAndPaymentsException {
 
         Controller c = new Controller();
 
@@ -243,22 +244,22 @@ public class PaymentTest {
         c.addPayment("sausages", "kitty", "37", "Mew", dateTime2, 13);
 
         Assert.assertEquals("sausages", c.getSenderName("556"));
-        Assert.assertEquals("moon", c.getRecipientName("556"));
+        Assert.assertEquals("moon", c.getRecieverName("556"));
         Assert.assertEquals("Rrrrr!", c.getPaymentPurpose("556"));
         Assert.assertEquals(dateTime1, c.getPaymentDateTime("556"));
-        Assert.assertEquals(12, c.getPaymentSum("556"));
+        Assert.assertEquals(12, c.getPaymentSum("556"),1.0);
 
         Assert.assertEquals("sausages", c.getSenderName("37"));
-        Assert.assertEquals("kitty", c.getRecipientName("37"));
+        Assert.assertEquals("kitty", c.getRecieverName("37"));
         Assert.assertEquals("Mew", c.getPaymentPurpose("37"));
         Assert.assertEquals(dateTime2, c.getPaymentDateTime("37"));
-        Assert.assertEquals(13, c.getPaymentSum("37"));
+        Assert.assertEquals(13, c.getPaymentSum("37"),1.0);
 
     }
 
 
     @Test
-    public void paymentSeveralForOneReceiver() {
+    public void paymentSeveralForOneReceiver() throws OrganizationAndPaymentsException {
 
         Controller c = new Controller();
         c.addOrganization("mystic", "00000000", 666);
@@ -272,21 +273,21 @@ public class PaymentTest {
         c.addPayment("sausages", "kitty", "37", "Mew", dateTime2, 13);
 
         Assert.assertEquals("mystic", c.getSenderName("556"));
-        Assert.assertEquals("kitty", c.getRecipientName("556"));
+        Assert.assertEquals("kitty", c.getRecieverName("556"));
         Assert.assertEquals("Rrrrr!", c.getPaymentPurpose("556"));
         Assert.assertEquals(dateTime1, c.getPaymentDateTime("556"));
-        Assert.assertEquals(12, c.getPaymentSum("556"));
+        Assert.assertEquals(12, c.getPaymentSum("556"),1.0);
 
         Assert.assertEquals("sausages", c.getSenderName("37"));
-        Assert.assertEquals("kitty", c.getRecipientName("37"));
+        Assert.assertEquals("kitty", c.getRecieverName("37"));
         Assert.assertEquals("Mew", c.getPaymentPurpose("37"));
         Assert.assertEquals(dateTime2, c.getPaymentDateTime("37"));
-        Assert.assertEquals(13, c.getPaymentSum("37"));
+        Assert.assertEquals(13, c.getPaymentSum("37"),1.0);
 
     }
 
-    @Test
-    public void paymentWithEmptySenderName() {
+    @Test(expected = OrganizationCannotBeFoundException.class)
+    public void paymentWithEmptySenderName() throws OrganizationAndPaymentsException {
 
         Controller c = new Controller();
         c.addOrganization("sausages", "22334456", 0);
@@ -300,7 +301,7 @@ public class PaymentTest {
 
 
     @Test(expected = OrganizationAndPaymentsException.class)
-    public void paymentWithEmptyRecieverName() {
+    public void paymentWithEmptyRecieverName() throws OrganizationAndPaymentsException {
 
         Controller c = new Controller();
         c.addOrganization("sausages", "22334456", 0);
@@ -312,8 +313,8 @@ public class PaymentTest {
     }
 
 
-    @Test(expected = EmptyIdException.class)
-    public void paymentWithEmptyUniqueNumber() {
+    @Test(expected = EmptyPaymentIdException.class)
+    public void paymentWithEmptyUniqueNumber() throws OrganizationAndPaymentsException {
 
         Controller c = new Controller();
         c.addOrganization("sausages", "22334456", 0);
@@ -326,8 +327,8 @@ public class PaymentTest {
     }
 
 
-    @Test(expected = EmptyPaymentException.class)
-    public void paymentWithEmptyPurpose() {
+    @Test(expected = EmptyPaymentPurposeException.class)
+    public void paymentWithEmptyPurpose() throws OrganizationAndPaymentsException {
 
         Controller c = new Controller();
 
@@ -341,8 +342,8 @@ public class PaymentTest {
     }
 
 
-    @Test
-    public void paymentWithDuplicateUniqueNumber() {
+    @Test(expected = DuplicatePaymentException.class)
+    public void paymentWithDuplicateUniqueNumber() throws OrganizationAndPaymentsException {
 
         Controller c = new Controller();
 
@@ -361,7 +362,7 @@ public class PaymentTest {
 
 
     @Test
-    public void paymentWithDuplicatePurpose() {
+    public void paymentWithDuplicatePurpose() throws OrganizationAndPaymentsException {
 
         Controller c = new Controller();
         c.addOrganization("mystic", "00000100", 122);
@@ -378,7 +379,7 @@ public class PaymentTest {
 
 
     @Test(expected = InvalidPaymentTimeException.class)
-    public void paymentWithTimeInTheFuture() {
+    public void paymentWithTimeInTheFuture() throws OrganizationAndPaymentsException {
 
         Controller c = new Controller();
         c.addOrganization("testFrom", "00000100", 100);
@@ -391,7 +392,7 @@ public class PaymentTest {
 
 
     @Test
-    public void paymentWithCurrentTime() {
+    public void paymentWithCurrentTime() throws OrganizationAndPaymentsException {
 
         Controller c = new Controller();
         c.addOrganization("testFrom", "00000100", 100);
@@ -404,7 +405,7 @@ public class PaymentTest {
 
 
     @Test
-    public void paymentTwoPaymentsWithTheSameTime() {
+    public void paymentTwoPaymentsWithTheSameTime() throws OrganizationAndPaymentsException {
 
         Controller c = new Controller();
 
@@ -419,7 +420,7 @@ public class PaymentTest {
 
 
     @Test
-    public void paymentWithCustomCharsInUniqueNumber() {
+    public void paymentWithCustomCharsInUniqueNumber() throws OrganizationAndPaymentsException {
 
         Controller c = new Controller();
         c.addOrganization("testFrom", "00000100", 100);
@@ -437,7 +438,7 @@ public class PaymentTest {
 
 
     @Test(expected = InvalidPaymentSumException.class)
-    public void paymentWithNegativeSum() {
+    public void paymentWithNegativeSum() throws OrganizationAndPaymentsException {
 
         Controller c = new Controller();
 
@@ -451,7 +452,7 @@ public class PaymentTest {
 
 
     @Test(expected = InvalidPaymentSumException.class)
-    public void paymentWithZeroSum() {
+    public void paymentWithZeroSum() throws OrganizationAndPaymentsException {
 
         Controller c = new Controller();
 
@@ -465,7 +466,7 @@ public class PaymentTest {
 
 
     @Test(expected = PaymentForItselfException.class)
-    public void paymentForItself() {
+    public void paymentForItself() throws OrganizationAndPaymentsException {
 
         Controller c = new Controller();
 
@@ -478,8 +479,8 @@ public class PaymentTest {
     }
 
 
-    @Test(expected = NotFoundPaymentException.class)
-    public void paymentObtainSenderNameByEmptyNumber() {
+    @Test(expected = PaymentCannotBeFoundException.class)
+    public void paymentObtainSenderNameByEmptyNumber() throws OrganizationAndPaymentsException {
 
         Controller c = new Controller();
 
@@ -494,8 +495,8 @@ public class PaymentTest {
     }
 
 
-    @Test
-    public void paymentObtainSenderNameForMissingNumber() {
+    @Test(expected = PaymentCannotBeFoundException.class)
+    public void paymentObtainSenderNameForMissingNumber() throws OrganizationAndPaymentsException {
 
         Controller c = new Controller();
 
@@ -510,8 +511,8 @@ public class PaymentTest {
     }
 
 
-    @Test(expected = NotFoundPaymentException.class)
-    public void paymentObtainReceiverNameByEmptyNumber() {
+    @Test(expected = PaymentCannotBeFoundException.class)
+    public void paymentObtainReceiverNameByEmptyNumber() throws OrganizationAndPaymentsException {
 
         Controller c = new Controller();
 
@@ -521,27 +522,12 @@ public class PaymentTest {
         LocalDateTime dateTime = LocalDateTime.of(2015, 1, 1, 12, 0, 0);
 
         c.addPayment("mystic", "moon", "1", "Just for fun!", dateTime, 69);
-        c.getRecipientName("");
+        c.getRecieverName("");
 
     }
 
-
-    @Test(expected = NotFoundPaymentException.class)
-    public void paymentObtainSenderNameForMissingNumber() {
-
-        Controller c = new Controller();
-        c.addOrganization("mystic", "00000000", 666);
-        c.addOrganization("moon", "12345678", 999);
-
-        LocalDateTime dateTime = LocalDateTime.of(2015, 1, 1, 12, 0, 0);
-        c.addPayment("mystic", "moon", "1", "Just for fun!", dateTime, 69);
-
-        c.getSenderName("2");
-    }
-
-
-    @Test(expected = NotFoundPaymentException.class)
-    public void PaymentObtainPurposeByEmptyNumber() {
+    @Test(expected = PaymentCannotBeFoundException.class)
+    public void PaymentObtainPurposeByEmptyNumber() throws OrganizationAndPaymentsException {
 
         Controller c = new Controller();
         c.addOrganization("mystic", "00000000", 666);
@@ -555,8 +541,8 @@ public class PaymentTest {
     }
 
 
-    @Test(expected = NotFoundPaymentException.class)
-    public void paymentObtainReceiverNameForMissingNumber() {
+    @Test(expected = PaymentCannotBeFoundException.class)
+    public void paymentObtainReceiverNameForMissingNumber() throws OrganizationAndPaymentsException {
 
         Controller c = new Controller();
 
@@ -566,13 +552,13 @@ public class PaymentTest {
         LocalDateTime dateTime = LocalDateTime.of(2015, 1, 1, 12, 0, 0);
         c.addPayment("mystic", "moon", "1", "Just for fun!", dateTime, 69);
 
-        c.getRecipientName("2");
+        c.getRecieverName("2");
 
     }
 
 
-    @Test(expected = NotFoundPaymentException.class)
-    public void paymentObtainPurposeByEmptyNumber() {
+    @Test(expected = PaymentCannotBeFoundException.class)
+    public void paymentObtainPurposeByEmptyNumber() throws OrganizationAndPaymentsException {
 
         Controller c = new Controller();
 
@@ -585,8 +571,8 @@ public class PaymentTest {
 
     }
 
-    @Test(expected = NotFoundPaymentException.class)
-    public void paymentObtainPurposeForMissingNumber() {
+    @Test(expected = PaymentCannotBeFoundException.class)
+    public void paymentObtainPurposeForMissingNumber() throws OrganizationAndPaymentsException {
 
         Controller c = new Controller();
 
@@ -600,8 +586,8 @@ public class PaymentTest {
     }
 
 
-    @Test(expected = NotFoundPaymentException.class)
-    public void paymentObtainDatetimeByEmptyNumber() {
+    @Test(expected = PaymentCannotBeFoundException.class)
+    public void paymentObtainDatetimeByEmptyNumber() throws OrganizationAndPaymentsException {
 
         Controller c = new Controller();
 
@@ -616,8 +602,8 @@ public class PaymentTest {
     }
 
 
-    @Test(expected = NotFoundPaymentException.class)
-    public void paymentObtainDateTimeForMissingNumber() {
+    @Test(expected = PaymentCannotBeFoundException.class)
+    public void paymentObtainDateTimeForMissingNumber() throws OrganizationAndPaymentsException {
 
         Controller c = new Controller();
 
@@ -631,8 +617,8 @@ public class PaymentTest {
     }
 
 
-    @Test(expected = NotFoundPaymentException.class)
-    public void paymentObtainSumByEmptyNumber() {
+    @Test(expected = PaymentCannotBeFoundException.class)
+    public void paymentObtainSumByEmptyNumber() throws OrganizationAndPaymentsException {
 
         Controller c = new Controller();
 
@@ -647,8 +633,8 @@ public class PaymentTest {
     }
 
 
-    @Test(expected = NotFoundPaymentException.class)
-    public void paymentObtainSumForMissingNumber() {
+    @Test(expected = PaymentCannotBeFoundException.class)
+    public void paymentObtainSumForMissingNumber() throws OrganizationAndPaymentsException {
 
         Controller c = new Controller();
 
@@ -662,36 +648,198 @@ public class PaymentTest {
 
     }
 
+    public LocalDateTime generateModel(int year,int month,int day) {
+
+        int hours = (int) (Math.random()*24);
+        int minutes = (int) (Math.random()*60);
+        int seconds = (int) (Math.random()*60);
+
+        return LocalDateTime.of(year,month,day,hours,minutes,seconds);
+
+    }
 
     @Test
-    public void queriesGetOrganizationsWithNegativeSaldo() {
+    public void queriesGetFinalBalances() throws OrganizationAndPaymentsException {
 
         Controller c = new Controller();
-//        generateModel(c);
 
-        List<String> exceptions = Arrays.asList("Gofi","Qwer");
+        c.addOrganization( "Yoha", "00110030", 0 );
+        c.addOrganization( "Toto", "00110047", 100 );
+        c.addOrganization( "Rute", "00110134", -25 );
+        c.addOrganization( "Gofi", "00120267", 45 );
+        c.addOrganization( "Qwer", "01003401", 20 );
+
+        c.addPayment( "Yoha", "Toto", "01", "payment #01", generateModel( 2010, 1, 1 ), 21 );
+        c.addPayment( "Yoha", "Rute", "02", "payment #02", generateModel( 2010, 1, 1 ), 21 );
+        c.addPayment( "Yoha", "Gofi", "03", "payment #03", generateModel( 2010, 1, 1 ), 21 );
+        c.addPayment( "Yoha", "Qwer", "04", "payment #04", generateModel( 2010, 1, 1 ), 21 );
+
+        c.addPayment( "Toto", "Yoha", "05", "payment #05", generateModel( 2010, 2, 1 ), 21 );
+        c.addPayment( "Toto", "Rute", "06", "payment #06", generateModel( 2010, 2, 1 ), 21 );
+        c.addPayment( "Toto", "Gofi", "07", "payment #07", generateModel( 2010, 2, 1 ), 21 );
+        c.addPayment( "Toto", "Qwer", "08", "payment #08", generateModel( 2010, 2, 1 ), 21 );
+
+        c.addPayment( "Rute", "Yoha", "09", "payment #09", generateModel( 2010, 1, 2 ), 21 );
+        c.addPayment( "Rute", "Toto", "10", "payment #10", generateModel( 2010, 1, 2 ), 21 );
+        c.addPayment( "Rute", "Gofi", "11", "payment #11", generateModel( 2010, 1, 2 ), 21 );
+        c.addPayment( "Rute", "Qwer", "12", "payment #12", generateModel( 2010, 1, 2 ), 21 );
+
+        c.addPayment( "Gofi", "Yoha", "13", "payment #13", generateModel( 2010, 3, 1 ), 21 );
+        c.addPayment( "Gofi", "Toto", "14", "payment #14", generateModel( 2010, 3, 1 ), 21 );
+        c.addPayment( "Gofi", "Rute", "15", "payment #15", generateModel( 2010, 3, 1 ), 21 );
+        c.addPayment( "Gofi", "Qwer", "16", "payment #16", generateModel( 2010, 3, 1 ), 21 );
+
+        c.addPayment( "Qwer", "Yoha", "17", "payment #17", generateModel( 2010, 1, 3 ), 21 );
+        c.addPayment( "Qwer", "Toto", "18", "payment #18", generateModel( 2010, 1, 3 ), 21 );
+        c.addPayment( "Qwer", "Rute", "19", "payment #19", generateModel( 2010, 1, 3 ), 21 );
+        c.addPayment( "Qwer", "Gofi", "20", "payment #20", generateModel( 2010, 1, 3 ), 21 );
+
+        c.addPayment( "Qwer", "Rute", "21", "payment #21", generateModel( 2010, 4, 1 ), 50 );
+        c.addPayment( "Gofi", "Yoha", "22", "payment #22", generateModel( 2010, 4, 1 ), 25 );
+        c.addPayment( "Gofi", "Toto", "23", "payment #23", generateModel( 2010, 4, 1 ), 20 );
+
+        HashMap<String,Double> expectation = new HashMap<>();
+        expectation.put("Gofi", 0.0);
+        expectation.put("Qwer", -30.0);
+        expectation.put("Rute", 25.0);
+        expectation.put("Toto", 120.0);
+        expectation.put( "Yoha", 25.0);
+        Assert.assertEquals(expectation,c.getFinalBalances());
+    }
+
+
+    @Test
+    public void queriesGetOrganizationsWithNegativeSaldo() throws OrganizationAndPaymentsException {
+
+        Controller c = new Controller();
+
+        c.addOrganization( "Yoha", "00110030", 0 );
+        c.addOrganization( "Toto", "00110047", 100 );
+        c.addOrganization( "Rute", "00110134", -25 );
+        c.addOrganization( "Gofi", "00120267", 45 );
+        c.addOrganization( "Qwer", "01003401", 20 );
+
+        c.addPayment( "Yoha", "Toto", "01", "payment #01", generateModel( 2010, 1, 1 ), 21 );
+        c.addPayment( "Yoha", "Rute", "02", "payment #02", generateModel( 2010, 1, 1 ), 21 );
+        c.addPayment( "Yoha", "Gofi", "03", "payment #03", generateModel( 2010, 1, 1 ), 21 );
+        c.addPayment( "Yoha", "Qwer", "04", "payment #04", generateModel( 2010, 1, 1 ), 21 );
+
+        c.addPayment( "Toto", "Yoha", "05", "payment #05", generateModel( 2010, 2, 1 ), 21 );
+        c.addPayment( "Toto", "Rute", "06", "payment #06", generateModel( 2010, 2, 1 ), 21 );
+        c.addPayment( "Toto", "Gofi", "07", "payment #07", generateModel( 2010, 2, 1 ), 21 );
+        c.addPayment( "Toto", "Qwer", "08", "payment #08", generateModel( 2010, 2, 1 ), 21 );
+
+        c.addPayment( "Rute", "Yoha", "09", "payment #09", generateModel( 2010, 1, 2 ), 21 );
+        c.addPayment( "Rute", "Toto", "10", "payment #10", generateModel( 2010, 1, 2 ), 21 );
+        c.addPayment( "Rute", "Gofi", "11", "payment #11", generateModel( 2010, 1, 2 ), 21 );
+        c.addPayment( "Rute", "Qwer", "12", "payment #12", generateModel( 2010, 1, 2 ), 21 );
+
+        c.addPayment( "Gofi", "Yoha", "13", "payment #13", generateModel( 2010, 3, 1 ), 21 );
+        c.addPayment( "Gofi", "Toto", "14", "payment #14", generateModel( 2010, 3, 1 ), 21 );
+        c.addPayment( "Gofi", "Rute", "15", "payment #15", generateModel( 2010, 3, 1 ), 21 );
+        c.addPayment( "Gofi", "Qwer", "16", "payment #16", generateModel( 2010, 3, 1 ), 21 );
+
+        c.addPayment( "Qwer", "Yoha", "17", "payment #17", generateModel( 2010, 1, 3 ), 21 );
+        c.addPayment( "Qwer", "Toto", "18", "payment #18", generateModel( 2010, 1, 3 ), 21 );
+        c.addPayment( "Qwer", "Rute", "19", "payment #19", generateModel( 2010, 1, 3 ), 21 );
+        c.addPayment( "Qwer", "Gofi", "20", "payment #20", generateModel( 2010, 1, 3 ), 21 );
+
+        c.addPayment( "Qwer", "Rute", "21", "payment #21", generateModel( 2010, 4, 1 ), 50 );
+        c.addPayment( "Gofi", "Yoha", "22", "payment #22", generateModel( 2010, 4, 1 ), 25 );
+        c.addPayment( "Gofi", "Toto", "23", "payment #23", generateModel( 2010, 4, 1 ), 20 );
+
+        List<String> exceptions = Arrays.asList("Qwer");
         Assert.assertEquals(exceptions,c.getOrganizationsWithNegativeSaldo());
 
     }
 
 
     @Test
-    public void queriesGetBiggestPaymentData() {
+    public void queriesGetBiggestPaymentData() throws OrganizationAndPaymentsException {
 
         Controller c = new Controller();
-//        generateModel(c);
+        c.addOrganization( "Yoha", "00110030", 0 );
+        c.addOrganization( "Toto", "00110047", 100 );
+        c.addOrganization( "Rute", "00110134", -25 );
+        c.addOrganization( "Gofi", "00120267", 45 );
+        c.addOrganization( "Qwer", "01003401", 20 );
+
+        c.addPayment( "Yoha", "Toto", "01", "payment #01", generateModel( 2010, 1, 1 ), 21 );
+        c.addPayment( "Yoha", "Rute", "02", "payment #02", generateModel( 2010, 1, 1 ), 21 );
+        c.addPayment( "Yoha", "Gofi", "03", "payment #03", generateModel( 2010, 1, 1 ), 21 );
+        c.addPayment( "Yoha", "Qwer", "04", "payment #04", generateModel( 2010, 1, 1 ), 21 );
+
+        c.addPayment( "Toto", "Yoha", "05", "payment #05", generateModel( 2010, 2, 1 ), 21 );
+        c.addPayment( "Toto", "Rute", "06", "payment #06", generateModel( 2010, 2, 1 ), 21 );
+        c.addPayment( "Toto", "Gofi", "07", "payment #07", generateModel( 2010, 2, 1 ), 21 );
+        c.addPayment( "Toto", "Qwer", "08", "payment #08", generateModel( 2010, 2, 1 ), 21 );
+
+        c.addPayment( "Rute", "Yoha", "09", "payment #09", generateModel( 2010, 1, 2 ), 21 );
+        c.addPayment( "Rute", "Toto", "10", "payment #10", generateModel( 2010, 1, 2 ), 21 );
+        c.addPayment( "Rute", "Gofi", "11", "payment #11", generateModel( 2010, 1, 2 ), 21 );
+        c.addPayment( "Rute", "Qwer", "12", "payment #12", generateModel( 2010, 1, 2 ), 21 );
+
+        c.addPayment( "Gofi", "Yoha", "13", "payment #13", generateModel( 2010, 3, 1 ), 21 );
+        c.addPayment( "Gofi", "Toto", "14", "payment #14", generateModel( 2010, 3, 1 ), 21 );
+        c.addPayment( "Gofi", "Rute", "15", "payment #15", generateModel( 2010, 3, 1 ), 21 );
+        c.addPayment( "Gofi", "Qwer", "16", "payment #16", generateModel( 2010, 3, 1 ), 21 );
+
+        c.addPayment( "Qwer", "Yoha", "17", "payment #17", generateModel( 2010, 1, 3 ), 21 );
+        c.addPayment( "Qwer", "Toto", "18", "payment #18", generateModel( 2010, 1, 3 ), 21 );
+        c.addPayment( "Qwer", "Rute", "19", "payment #19", generateModel( 2010, 1, 3 ), 21 );
+        c.addPayment( "Qwer", "Gofi", "20", "payment #20", generateModel( 2010, 1, 3 ), 21 );
+
+        c.addPayment( "Qwer", "Rute", "21", "payment #21", generateModel( 2010, 4, 1 ), 50 );
+        c.addPayment( "Gofi", "Yoha", "22", "payment #22", generateModel( 2010, 4, 1 ), 25 );
+        c.addPayment( "Gofi", "Toto", "23", "payment #23", generateModel( 2010, 4, 1 ), 20 );
+
 
         Assert.assertEquals("21",c.getIdOfBiggestPayment());
 
     }
 
     @Test
-    public void queriesGetDateWithBiggestTotalPaymentsAmount() {
+    public void queriesGetDateWithBiggestTotalPaymentsAmount() throws OrganizationAndPaymentsException {
 
         Controller c = new Controller();
-//        generateModel(c);
 
-        LocalDateTime exceptions = LocalDateTime.of(2010, 4, 1,0,0);
+        c.addOrganization( "Yoha", "00110030", 0 );
+        c.addOrganization( "Toto", "00110047", 100 );
+        c.addOrganization( "Rute", "00110134", -25 );
+        c.addOrganization( "Gofi", "00120267", 45 );
+        c.addOrganization( "Qwer", "01003401", 20 );
+
+        c.addPayment( "Yoha", "Toto", "01", "payment #01", generateModel( 2010, 1, 1 ), 21 );
+        c.addPayment( "Yoha", "Rute", "02", "payment #02", generateModel( 2010, 1, 1 ), 21 );
+        c.addPayment( "Yoha", "Gofi", "03", "payment #03", generateModel( 2010, 1, 1 ), 21 );
+        c.addPayment( "Yoha", "Qwer", "04", "payment #04", generateModel( 2010, 1, 1 ), 21 );
+
+        c.addPayment( "Toto", "Yoha", "05", "payment #05", generateModel( 2010, 2, 1 ), 21 );
+        c.addPayment( "Toto", "Rute", "06", "payment #06", generateModel( 2010, 2, 1 ), 21 );
+        c.addPayment( "Toto", "Gofi", "07", "payment #07", generateModel( 2010, 2, 1 ), 21 );
+        c.addPayment( "Toto", "Qwer", "08", "payment #08", generateModel( 2010, 2, 1 ), 21 );
+
+        c.addPayment( "Rute", "Yoha", "09", "payment #09", generateModel( 2010, 1, 2 ), 21 );
+        c.addPayment( "Rute", "Toto", "10", "payment #10", generateModel( 2010, 1, 2 ), 21 );
+        c.addPayment( "Rute", "Gofi", "11", "payment #11", generateModel( 2010, 1, 2 ), 21 );
+        c.addPayment( "Rute", "Qwer", "12", "payment #12", generateModel( 2010, 1, 2 ), 21 );
+
+        c.addPayment( "Gofi", "Yoha", "13", "payment #13", generateModel( 2010, 3, 1 ), 21 );
+        c.addPayment( "Gofi", "Toto", "14", "payment #14", generateModel( 2010, 3, 1 ), 21 );
+        c.addPayment( "Gofi", "Rute", "15", "payment #15", generateModel( 2010, 3, 1 ), 21 );
+        c.addPayment( "Gofi", "Qwer", "16", "payment #16", generateModel( 2010, 3, 1 ), 21 );
+
+        c.addPayment( "Qwer", "Yoha", "17", "payment #17", generateModel( 2010, 1, 3 ), 21 );
+        c.addPayment( "Qwer", "Toto", "18", "payment #18", generateModel( 2010, 1, 3 ), 21 );
+        c.addPayment( "Qwer", "Rute", "19", "payment #19", generateModel( 2010, 1, 3 ), 21 );
+        c.addPayment( "Qwer", "Gofi", "20", "payment #20", generateModel( 2010, 1, 3 ), 21 );
+
+        c.addPayment( "Qwer", "Rute", "21", "payment #21", generateModel( 2010, 4, 1 ), 50 );
+        c.addPayment( "Gofi", "Yoha", "22", "payment #22", generateModel( 2010, 4, 1 ), 25 );
+        c.addPayment( "Gofi", "Toto", "23", "payment #23", generateModel( 2010, 4, 1 ), 20 );
+
+
+        LocalDate exceptions = LocalDate.of(2010, 4, 1);
         Assert.assertEquals(exceptions,c.getDateWithBiggestTotalPayments());
 
     }

@@ -3,6 +3,7 @@ import Exceptions.InvalidRegistrationNumberFormatException;
 import Exceptions.OrganizationAndPaymentsException;
 
 import java.util.ArrayList;
+import java.util.regex.*;
 
 public class Organization {
 
@@ -14,14 +15,18 @@ public class Organization {
     public Organization(String organizationName,String registrationNumber,double balance) throws OrganizationAndPaymentsException {
 
         if(organizationName.isEmpty()) throw new EmptyOrganizationNameException();
-        if(registrationNumber.length() > 8) throw new InvalidRegistrationNumberFormatException();
+        if(!valNumber(registrationNumber)) throw new InvalidRegistrationNumberFormatException();
         this.organizationName = organizationName;
         this.registrationNumber = registrationNumber;
         this.balance = balance;
 
     }
-    //val Number
-
+    public static boolean valNumber(String input) {
+        String phoneRegex = "[0-9]{8}";
+        Pattern phonePattern = Pattern.compile(phoneRegex);
+        Matcher matcher = phonePattern.matcher(input);
+        return matcher.find();
+    }
 
     public String getOrganizationName() {
         return organizationName;
@@ -36,7 +41,7 @@ public class Organization {
         return balance;
     }
 
-
-    public void setBalance(double v) {
+    public void setBalance(double balance) {
+        this.balance = balance;
     }
 }
