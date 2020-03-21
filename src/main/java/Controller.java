@@ -42,7 +42,7 @@ public class Controller {
                 break;
             }
         }
-        if (organizationFound != Found.TRUE) throw new OrganizationNotFoundException();
+        if (organizationFound != Found.TRUE) throw new OrganizationCannotBeFoundException();
         payments.add(new Payment(senderOrganization, recieverOrganization, uniqueCode, paymentPurpose, paymentDateTime, paymentSum));
     }
 
@@ -56,7 +56,7 @@ public class Controller {
                 paymentFound = true;
             }
         }
-        if (!paymentFound) throw new NotFoundPaymentException();
+        if (!paymentFound) throw new PaymentCannotBeFoundException();
         return paymentPurpose;
     }
 
@@ -70,7 +70,7 @@ public class Controller {
                 checker = true;
             }
         }
-        if (!checker) throw new NotFoundPaymentException();
+        if (!checker) throw new PaymentCannotBeFoundException();
         return date;
     }
 
@@ -84,7 +84,7 @@ public class Controller {
                 paymentFound = true;
             }
         }
-        if (!paymentFound) throw new NotFoundPaymentException();
+        if (!paymentFound) throw new PaymentCannotBeFoundException();
         return sum;
     }
 
@@ -98,7 +98,7 @@ public class Controller {
                 paymentFound = true;
             }
         }
-        if (!paymentFound) throw new NotFoundPaymentException();
+        if (!paymentFound) throw new PaymentCannotBeFoundException();
         return senderName;
     }
 
@@ -108,11 +108,11 @@ public class Controller {
         boolean paymentFound = false;
         for (Payment x : payments) {
             if (x.getUniqueCode().equals(paymentId)) {
-                recieverName = x.getRecieverOrganiaton().getOrganizationName();
+                recieverName = x.getRecieverOrganization().getOrganizationName();
                 paymentFound = true;
             }
         }
-        if (!paymentFound) throw new NotFoundPaymentException();
+        if (!paymentFound) throw new PaymentCannotBeFoundException();
         return recieverName;
     }
 
@@ -120,7 +120,7 @@ public class Controller {
     public void addOrganization(String name, String registrationNumber, double initialBalance) throws OrganizationAndPaymentsException {
         for (Organization x : organizations) {
             if (x.getOrganizationName().equals(name)) throw new DuplicateOrganizationException();
-            else if (x.getRegistrationNumber().equals(registrationNumber)) throw new DuplicateNumberException();
+            else if (x.getRegistrationNumber().equals(registrationNumber)) throw new DuplicateRegistrationNumberException();
         }
         organizations.add(new Organization(name, registrationNumber, initialBalance));
 
@@ -131,7 +131,7 @@ public class Controller {
         for (Organization x : organizations) {
             if (x.getOrganizationName().equals(organizationName)) return x.getRegistrationNumber();
         }
-        throw new OrganizationNotFoundException();
+        throw new OrganizationCannotBeFoundException();
 
     }
 
@@ -140,7 +140,7 @@ public class Controller {
         for (Organization x : organizations) {
             if (x.getOrganizationName().equals(organizationName)) return x.getBalance();
         }
-        throw new OrganizationNotFoundException();
+        throw new OrganizationCannotBeFoundException();
     }
 
 

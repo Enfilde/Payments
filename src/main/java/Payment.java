@@ -4,15 +4,15 @@ import java.time.*;
 
 public class Payment {
 
-   private Organization senderName,recieverName;
+   private Organization senderOrganization,recieverOrganization;
    private String uniqueCode;
    private String paymentPurpose;
    private LocalDateTime paymentDateTime;
    private double paymentSum;
 
-   public Payment(String senderName, String recieverName, String uniqueCode, String paymentPurpose,LocalDateTime paymentDateTime, double paymentSum) throws OrganizationAndPaymentsException {
+   public Payment(Organization senderOrganization, Organization recieverOrganization, String uniqueCode, String paymentPurpose,LocalDateTime paymentDateTime, double paymentSum) throws OrganizationAndPaymentsException {
 
-      if(senderName.equals(recieverName)) throw new PaymentForItselfException();
+      if(senderOrganization.getOrganizationName().equals(recieverOrganization.getOrganizationName())) throw new PaymentForItselfException();
       if(uniqueCode.isEmpty()) throw new EmptyPaymentIdException();
       if(paymentPurpose.isEmpty()) throw new EmptyPaymentPurposeException();
       if(paymentDateTime.isAfter(LocalDateTime.now())) throw new InvalidPaymentTimeException();
@@ -22,16 +22,17 @@ public class Payment {
       this.paymentPurpose = paymentPurpose;
       this.paymentDateTime = paymentDateTime;
       this.paymentSum = paymentSum;
+      this.senderOrganization = senderOrganization;
+      this.recieverOrganization = recieverOrganization;
 
    }
 
-
-   public Organization getSenderName() {
-      return senderName;
+   public Organization getSenderOrganization() {
+      return senderOrganization;
    }
 
-   public Organization getRecieverName() {
-      return recieverName;
+   public Organization getRecieverOrganization() {
+      return recieverOrganization;
    }
 
    public String getUniqueCode() {
